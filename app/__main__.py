@@ -1,25 +1,54 @@
-from datetime import date
-from time import gmtime, strftime
+import pickle
+import sys
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 
 app = Flask(__name__)
 
-
-@app.route('/')
-def index():
-  return jsonify({"message": "Welcome to my Flask App"})
+model = None
 
 
-@app.route('/info')
-def info():
-  return jsonify({
-    "current_date": date.today().strftime("%B %d, %Y"),
-    "current_time": strftime("%H:%M:%S +0000", gmtime()),
-    "status": "OK"
-  })
+@app.route("/")
+def health_check():
+    return jsonify({"message": "healthy"})
 
 
-if __name__ == '__main__':
-  app.run(host='0.0.0.0', debug=True)
+@app.route("/predict", methods=["POST"])
+def predict():
+    payload = request.get_json()
+    request_data = payload.get("data")
+    response = {}
+    return jsonify(response)
+
+
+@app.route("/score", methods=["POST"])
+def score():
+    payload = request.get_json()
+    response = {}
+    return jsonify(response)
+
+
+@app.route("/update", methods=["PUT"])
+def update():
+    payload = request.get_json()
+    response = {}
+    return jsonify(response)
+
+
+def main():
+
+    try:
+        model_path = sys.argv[1]
+    except IndexError:
+        return 1
+
+    with open(model_path, "rb") as f:
+        model = pickle.load(f)
+
+    app.run(host="0.0.0.0", debug=True)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
